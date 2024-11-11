@@ -22,7 +22,7 @@ def scrape_info_on_page(driver):
     ul_xpath = "/html/body/div[1]/div/main/div[3]/section/div/div[1]/div/div[1]/ul"
     image_urls = get_image_sources_from_thumbnails(driver, ul_xpath)
     
-    # Product name
+    # Product Name
     product_name_element = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/main/div[3]/section/div/div[2]/div/span[1]/h1"))
     )
@@ -58,32 +58,29 @@ def scrape_info_on_page(driver):
 
     for div_num in [6, 7, 8]:
         button_xpath = paths[div_num]["button"]
-        print(f"Attempting to use button XPath for div[{div_num}]: {button_xpath}")
-
+        # print(f"Attempting to use button XPath for div[{div_num}]: {button_xpath}")
         try:
-            # Click the button to reveal description and category
             button_xpath = paths[div_num]["button"]
             if not safe_click(driver, button_xpath):
-                print(f"Could not click button at div[{div_num}]. Moving to next.")
                 continue
-            print(f"Button clicked successfully at div[{div_num}] for product '{product_name}'.")
+            # print(f"Button clicked successfully at div[{div_num}] for product '{product_name}'.")
 
-            # Extract description
+            # Description
             ul_element_xpath = paths[div_num]["ul_element"]
             ul_element = WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.XPATH, ul_element_xpath))
             )
             li_elements = ul_element.find_elements(By.TAG_NAME, "li")
             description = [li.text for li in li_elements]
-            print(f"Description found at div[{div_num}]: {description}")
+            # print(f"Description found at div[{div_num}]: {description}")
 
-            # Extract category
+            # Category
             category_xpath = paths[div_num]["category"]
             category_element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, category_xpath))
             )
             category = category_element.text
-            print(f"Category found at div[{div_num}]: {category}")
+            # print(f"Category found at div[{div_num}]: {category}")
 
             break
 
@@ -96,7 +93,6 @@ def scrape_info_on_page(driver):
     
     return image_urls, product_name, price, category, description
 
-
 def scraping(product):
     chrome_options = Options()
     chrome_options.add_argument("--disable-gpu")
@@ -108,7 +104,7 @@ def scraping(product):
     driver = webdriver.Chrome(service=Service("/usr/local/bin/chromedriver"), options=chrome_options)
     
     try: 
-        driver.get(product["product_url"])
+        driver.get(product["product_url"])        
         image_urls, product_name, price, category, description = scrape_info_on_page(driver)
         
         product_info = {
@@ -130,34 +126,25 @@ def scraping(product):
     return product_info
 
 
-
-
-
-
-
-
-
-
-
-
-
 def save_to_json(data, output_file="asos_shirt_vest.json"):
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=4)
 
-def read_product_urls_from_csv(filename):
+def read_product_urls_from_csv(filename, start=0, limit=100):
     products = []
     with open(filename, mode='r') as file:
         reader = csv.DictReader(file)
         for i, row in enumerate(reader):
-            if i >= 100:  # Limit to first 100 products
-                break
+            if i < start:
+                continue  
+            if i >= start + limit:
+                break 
             products.append({"product_id": row["product_id"], "product_url": row["url"]})
     return products
 
 def main():
-    csv_file = "cat_csv/asos_shirts_vests.csv"
-    products = read_product_urls_from_csv(csv_file)
+    csv_file = "cat_csv/asos_hoodies_sweatshirts.csv"
+    products = read_product_urls_from_csv(csv_file, start=500, limit=100)  
 
     with Pool(processes=cpu_count()) as pool:
         scraped_data = pool.map(scraping, products)
@@ -166,7 +153,7 @@ def main():
     # scraped_data = [data for data in scraped_data if data is not None]
     
     # Save the scraped data to a JSON file
-    save_to_json(scraped_data, "product_json/asos_shirt_vest.json")
+    save_to_json(scraped_data, "product_json/Hoodies&Sweatshirts/asos_hoodies_sweatshirts_501_600.json")
 
 if __name__ == "__main__":
     main()
