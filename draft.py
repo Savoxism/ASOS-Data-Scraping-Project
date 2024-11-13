@@ -6,6 +6,6 @@ def count_scraped_products(json_file):
     return len(data)
 
 # Replace with the path to your JSON file
-json_file = "product_json/Hoodies&Sweatshirts/asos_hoodies_sweatchirts_combined.json"
+json_file = "product_json/Jeans/asos_jeans_001_600.json"
 count = count_scraped_products(json_file)
 print(f"Number of products scraped: {count}")

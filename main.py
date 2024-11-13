@@ -10,6 +10,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename='logs/scrape.log')
+
 from utils import get_image_sources_from_thumbnails, safe_click  
 
 
@@ -64,6 +68,7 @@ def scrape_info_on_page(driver):
             if not safe_click(driver, button_xpath):
                 continue
             # print(f"Button clicked successfully at div[{div_num}] for product '{product_name}'.")
+            logging.info(f"Button clicked successfully at div[{div_num}] for product '{product_name}'.")
 
             # Description
             ul_element_xpath = paths[div_num]["ul_element"]
@@ -73,6 +78,7 @@ def scrape_info_on_page(driver):
             li_elements = ul_element.find_elements(By.TAG_NAME, "li")
             description = [li.text for li in li_elements]
             # print(f"Description found at div[{div_num}]: {description}")
+            logging.info(f"Description found at div[{div_num}]: {description}")
 
             # Category
             category_xpath = paths[div_num]["category"]
@@ -81,14 +87,17 @@ def scrape_info_on_page(driver):
             )
             category = category_element.text
             # print(f"Category found at div[{div_num}]: {category}")
+            logging.info(f"Category found at div[{div_num}]: {category}")
 
             break
 
         except (TimeoutException, NoSuchElementException) as e:
-            print(f"Failed to retrieve category or description using div[{div_num}]. Error: {e}")
+            logging.error(f"Failed to retrieve category or description using div[{div_num}]. Error: {e}")
+            # print(f"Failed to retrieve category or description using div[{div_num}]. Error: {e}")
 
     if not description or not category:
-        print("Description or category not found for any div variant.")
+        # print("Description or category not found for any div variant.")
+        logging.error("Description or category not found for any div variant.")
         return None, None
     
     return image_urls, product_name, price, category, description
@@ -130,30 +139,36 @@ def save_to_json(data, output_file="asos_shirt_vest.json"):
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=4)
 
-def read_product_urls_from_csv(filename, start=0, limit=100):
+def read_product_urls_from_csv(filename, num_products=600):
+    from random import sample
     products = []
     with open(filename, mode='r') as file:
         reader = csv.DictReader(file)
         for i, row in enumerate(reader):
-            if i < start:
-                continue  
-            if i >= start + limit:
-                break 
+            # if i < start:
+            #     continue  
+            # if i >= start + limit:
+            #     break 
             products.append({"product_id": row["product_id"], "product_url": row["url"]})
+    
+    products = sample(products, num_products)
+    
     return products
 
 def main():
-    csv_file = "cat_csv/asos_hoodies_sweatshirts.csv"
-    products = read_product_urls_from_csv(csv_file, start=500, limit=100)  
+    csv_files = ["cat_csv/asos_jeans.csv", ""]
+    for csv_file in csv_files:
+        # csv_file = "cat_csv/asos_jeans.csv"
+        products = read_product_urls_from_csv(csv_file, start=0, limit=600)  
 
-    with Pool(processes=cpu_count()) as pool:
-        scraped_data = pool.map(scraping, products)
-    
-    # # Filter out any None values if scraping failed for some products
-    # scraped_data = [data for data in scraped_data if data is not None]
-    
-    # Save the scraped data to a JSON file
-    save_to_json(scraped_data, "product_json/Hoodies&Sweatshirts/asos_hoodies_sweatshirts_501_600.json")
+        with Pool(processes=cpu_count()) as pool:
+            scraped_data = pool.map(scraping, products)
+        
+        # Filter out any None values if scraping failed for some products
+        scraped_data = [data for data in scraped_data if data is not None]
+        
+        # Dump into a JSON file 
+        save_to_json(scraped_data, f"product_json/export_{csv_file.split("/")[-1].split(".")[0]}.json")
 
 if __name__ == "__main__":
     main()
