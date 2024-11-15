@@ -157,11 +157,11 @@ def main():
         products = read_product_urls_from_csv(csv_file, num_products=700)
         logging.info(f"Scraping {len(products)} products for category '{category_name}'")
 
-        batch_size = 20  # Adjust based on performance needs
+        batch_size = 20
         total_data = []
         
     # Increase the number of cores used for multiprocessing
-        num_cores = min(cpu_count(), 10)  # Adjust to use up to 8 cores, or change to cpu_count() if needed
+        num_cores = min(cpu_count(), 10)  
         with Pool(processes=num_cores) as pool:
             for i in tqdm(range(0, len(products), batch_size), desc=f"Scraping {category_name}"):
                 batch = products[i:i + batch_size]
