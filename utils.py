@@ -22,7 +22,7 @@ def safe_click(driver, button_xpath):
         time.sleep(3)
         return True
     except (TimeoutException, ElementClickInterceptedException, NoSuchElementException):
-        print(f"Failed to click button at {button_xpath}")
+        # print(f"Failed to click button at {button_xpath}")
         return False
     
 def get_largest_image_from_srcset(srcset):

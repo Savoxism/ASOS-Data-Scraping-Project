@@ -5,6 +5,9 @@ from selenium.webdriver.chrome.options import Options
 import time
 import csv
 
+chromedriver_path_win = "C:\Program Files\Executables\chromedriver.exe"
+chromedriver_path_mac = "/usr/local/bin/chromedriver"
+
 chrome_options = Options()
 chrome_options.add_argument("--disable-gpu")  
 chrome_options.add_argument("--disable-webgl") 
@@ -12,11 +15,11 @@ chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")  
 chrome_options.add_argument("--blink-settings=imagesEnabled=false") 
 chrome_options.add_argument("--disable-extensions") 
-driver = webdriver.Chrome(service=Service("/usr/local/bin/chromedriver"), options=chrome_options)
+driver = webdriver.Chrome(service=Service(chromedriver_path_win), options=chrome_options)
 
 # Base URL for ASOS catalog page
-base_url = "https://www.asos.com/men/trousers-chinos/cat/?cid=4910&page="
-target_product_count = 600  # Target number of products
+base_url = "https://www.asos.com/men/polo-shirts/cat/?cid=4616&page="
+target_product_count = 700  # Target number of products
 current_page = 1
 total_products = 0
 data = []
@@ -56,7 +59,7 @@ while total_products < target_product_count:
     current_page += 1
 
 # Save data to CSV
-csv_file = "cat_csv/asos_trousers_chinos.csv"
+csv_file = "cat_csv/asos_polo_shirts.csv"
 with open(csv_file, mode="w", newline="") as file:
     writer = csv.writer(file)
     writer.writerow(["product_id", "url"])  
