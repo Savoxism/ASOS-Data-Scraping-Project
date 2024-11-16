@@ -149,7 +149,7 @@ def read_product_urls_from_csv(filename, num_products=700):
     return sample(products, num_products) if len(products) >= num_products else products
 
 def main():
-    csv_files = ["cat_csv/asos_co_ords.csv", "cat_csv/asos_joggers.csv", "cat_csv/asos_loungewear.csv"]
+    csv_files = ["cat_csv/women/women folder/cat_csv/women_cat/asos_loungewear.csv", "cat_csv/women/women folder/cat_csv/women_cat/asos_shorts.csv", "cat_csv/women/women folder/cat_csv/women_cat/asos_tops.csv", "cat_csv/women/women folder/cat_csv/women_cat/asos_trousers_leggings.csv"]
     for csv_file in csv_files:
         category_name = csv_file.split("/")[-1].split(".")[0]
         
